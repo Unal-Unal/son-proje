@@ -5,7 +5,7 @@ import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
 import Header from '../layout/Header';
 import Footer from '../layout/Footer';
 import ContactOffices from '../components/contact/ContactOffices';
-import ContactCTA from '../components/contact/ContactCTA';
+import ContactCta from '../components/contact/ContactCta';
 
 const ContactPage = () => {
   return (
@@ -133,7 +133,7 @@ const ContactPage = () => {
               
              <ContactOffices />
 
-             <ContactCTA />
+             <ContactCta />
 
       </main>
 

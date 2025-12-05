@@ -10,7 +10,7 @@ const Footer = () => {
   const location = useLocation();
   
   // Hangi sayfadayız kontrolü
-const isShopPage = location.pathname === '/shop' || location.pathname.includes('/product') || location.pathname === '/contact';
+const isShopPage = location.pathname === '/shop' || location.pathname.includes('/product') || location.pathname === '/contact' || location.pathname === '/team' || location.pathname === '/about';
 
   // ====================================================================
   // 🛒 DURUM 1: SHOP SAYFASI İÇİN FOOTER (BEYAZ TEMA)

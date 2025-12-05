@@ -8,6 +8,8 @@ import HomePage from "./pages/HomePage"; // HomePage import edildiğini varsayı
 import ShopPage from './pages/ShopPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import ContactPage from './pages/ContactPage';
+import TeamPage from './pages/TeamPage';
+import AboutPage from './pages/AboutPage';
 
 // ⚠️ NOT: Bu fonksiyonun başında gerekli import'ları (Routes, Route, HomePage)
 // yaptığınızdan ve App.js'in en üstünde HomePage'i import ettiğinizden emin olun.
@@ -31,6 +33,10 @@ function App() {
         <Route path="/product" element={<ProductDetailPage />} />
 
         <Route path="/contact" element={<ContactPage />} />
+
+        <Route path="/team" element={<TeamPage />} />
+
+        <Route path="/about" element={<AboutPage />} />
         
         {/* Örnek olarak bir 404 sayfası:
         <Route path="*" element={<h1>404 Sayfa Bulunamadı</h1>} /> 

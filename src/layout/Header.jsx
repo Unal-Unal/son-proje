@@ -16,7 +16,7 @@ const Header = () => {
 
   // --- SAYFA KONTROLLERİ ---
   const isShopPage = location.pathname === '/shop' || location.pathname.includes('/product');
-  const isContactPage = location.pathname === '/contact';
+  const isContactPage = location.pathname === '/contact' || location.pathname === '/team' || location.pathname === '/about';
   const isHomePage = !isShopPage && !isContactPage; 
 
 
