@@ -1,31 +1,50 @@
 // src/components/product-detail/ProductHero.js
 
 import React, { useState, useEffect } from 'react';
+// 👇 REDUX ve TOAST IMPORTLARI
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../../store/actions/shoppingCartActions';
+import { toast } from 'react-toastify'; 
+// ---------------------------
 import { Star, Heart, ShoppingCart, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ProductHero = ({ product }) => {
-    // Verileri güvenli şekilde alalım. product null gelebilir diye default değerler ({}) veriyoruz.
+    const dispatch = useDispatch(); // Dispatch kancası
+
+    // API'den gelen verileri güvenli bir şekilde alıyoruz
     const { name, description, price, stock, rating, images, sell_count } = product || {};
 
     const [activeImage, setActiveImage] = useState("");
 
-    // Ürün veya resimler değiştiğinde ilk resmi seç
+    // Ürün verisi yüklendiğinde ilk resmi seç
     useEffect(() => {
         if (images && images.length > 0) {
             setActiveImage(images[0].url);
         }
     }, [product]);
 
-    // Gösterilecek resim
     const displayImage = activeImage || "https://via.placeholder.com/600x400?text=No+Image";
     const starCount = Math.round(rating || 0);
+
+    // 👇 SEPETE EKLEME FONKSİYONU
+    const handleAddToCart = () => {
+        if (product && product.id) {
+            // Sepete ekle action'ını tetikle
+            dispatch(addToCart(product)); 
+            // Kullanıcıya yeşil bildirim göster
+            toast.success("Product added to cart!"); 
+        } else {
+            toast.error("Product data not loaded yet.");
+        }
+    };
 
     return (
         <section className="bg-[#FAFAFA] pb-12">
             <div className="max-w-7xl mx-auto px-4 md:px-8">
+                
                 <div className="flex flex-col md:flex-row gap-8">
                     
-                    {/* SOL: GALERİ */}
+                    {/* --- SOL TARAFA: ÜRÜN GÖRSELLERİ --- */}
                     <div className="w-full md:w-1/2">
                         <div className="relative w-full h-[300px] md:h-[450px] mb-4">
                             <img 
@@ -33,12 +52,14 @@ const ProductHero = ({ product }) => {
                                 alt={name} 
                                 className="w-full h-full object-cover rounded-md shadow-sm transition-opacity duration-300"
                             />
-                            {/* Oklar görsel amaçlı */}
-                            <button className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-200"><ChevronLeft size={48} /></button>
-                            <button className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-200"><ChevronRight size={48} /></button>
+                            <button className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-200">
+                                <ChevronLeft size={48} strokeWidth={1} />
+                            </button>
+                            <button className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-200">
+                                <ChevronRight size={48} strokeWidth={1} />
+                            </button>
                         </div>
 
-                        {/* Thumbnails */}
                         <div className="flex gap-4 overflow-x-auto pb-2">
                             {images?.map((img, index) => (
                                 <div 
@@ -52,34 +73,76 @@ const ProductHero = ({ product }) => {
                         </div>
                     </div>
 
-                    {/* SAĞ: BİLGİLER */}
+
+                    {/* --- SAĞ TARAFA: ÜRÜN DETAYLARI --- */}
                     <div className="w-full md:w-1/2 px-4 md:px-8 py-4">
-                        <h4 className="text-xl font-normal text-slate-800 mb-3">{name}</h4>
                         
+                        <h4 className="text-xl font-normal text-slate-800 mb-3">
+                            {name}
+                        </h4>
+
                         <div className="flex items-center gap-2 mb-5">
                             <div className="flex text-yellow-400">
-                                {[1, 2, 3, 4, 5].map(s => (
-                                    <Star key={s} size={20} fill={s <= starCount ? "currentColor" : "none"} stroke="currentColor" />
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star 
+                                        key={star} 
+                                        size={20} 
+                                        fill={star <= starCount ? "currentColor" : "none"} 
+                                        stroke="currentColor" 
+                                        strokeWidth={1.5}
+                                    />
                                 ))}
                             </div>
-                            <span className="text-sm font-bold text-gray-500">{sell_count} Reviews</span>
+                            <span className="text-sm font-bold text-gray-500">
+                                {sell_count} Reviews
+                            </span>
                         </div>
 
                         <div className="mb-5">
-                            <h3 className="text-2xl font-bold text-slate-800 mb-1">${price}</h3>
+                            <h3 className="text-2xl font-bold text-slate-800 mb-1">
+                                ${price}
+                            </h3>
                             <div className="text-sm font-bold text-gray-500">
-                                Availability : <span className={stock > 0 ? "text-sky-500" : "text-red-500"}>{stock > 0 ? "In Stock" : "Out of Stock"}</span>
+                                Availability : 
+                                <span className={`ml-1 ${stock > 0 ? "text-sky-500" : "text-red-500"}`}>
+                                    {stock > 0 ? "In Stock" : "Out of Stock"}
+                                </span>
                             </div>
                         </div>
 
-                        <p className="text-sm text-gray-500 leading-relaxed mb-8 border-b border-gray-200 pb-6">{description}</p>
+                        <p className="text-sm text-gray-500 leading-relaxed mb-8 border-b border-gray-200 pb-6">
+                            {description}
+                        </p>
 
-                        <div className="flex items-center gap-3">
-                            <button className="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-md transition-colors text-sm">Select Options</button>
-                            <button className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-100 bg-white"><Heart size={20} /></button>
-                            <button className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-100 bg-white"><ShoppingCart size={20} /></button>
-                            <button className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-100 bg-white"><Eye size={20} /></button>
+                        <div className="flex gap-2 mb-8">
+                            <span className="w-8 h-8 rounded-full bg-sky-500 cursor-pointer hover:scale-110 transition-transform"></span>
+                            <span className="w-8 h-8 rounded-full bg-green-500 cursor-pointer hover:scale-110 transition-transform"></span>
+                            <span className="w-8 h-8 rounded-full bg-orange-400 cursor-pointer hover:scale-110 transition-transform"></span>
+                            <span className="w-8 h-8 rounded-full bg-slate-800 cursor-pointer hover:scale-110 transition-transform"></span>
                         </div>
+
+                        {/* AKSİYON BUTONLARI */}
+                        <div className="flex items-center gap-3">
+                            {/* "Select Options" butonu yerine "Add to Cart" işlevini buraya bağladık */}
+                            <button 
+                                onClick={handleAddToCart}
+                                disabled={stock <= 0} // Stok yoksa buton pasif olsun
+                                className="bg-sky-500 hover:bg-sky-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-md transition-colors text-sm"
+                            >
+                                {stock > 0 ? "Add to Cart" : "Out of Stock"}
+                            </button>
+                            
+                            <button className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-100 transition-colors bg-white">
+                                <Heart size={20} className="text-slate-800" />
+                            </button>
+                            <button className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-100 transition-colors bg-white">
+                                <ShoppingCart size={20} className="text-slate-800" />
+                            </button>
+                            <button className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-100 transition-colors bg-white">
+                                <Eye size={20} className="text-slate-800" />
+                            </button>
+                        </div>
+
                     </div>
 
                 </div>
