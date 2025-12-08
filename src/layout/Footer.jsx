@@ -9,8 +9,14 @@ import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa';
 const Footer = () => {
   const location = useLocation();
   
-  // Hangi sayfadayız kontrolü
-const isShopPage = location.pathname === '/shop' || location.pathname.includes('/product') || location.pathname === '/contact' || location.pathname === '/team' || location.pathname === '/about';
+  // Hangi sayfadayız kontrolü - GÜNCELLENDİ
+  // startsWith('/shop') sayesinde /shop/kadin/elbise gibi alt yollarda da true döner.
+  const isShopPage = 
+      location.pathname.startsWith('/shop') || 
+      location.pathname.includes('/product') || 
+      location.pathname === '/contact' || 
+      location.pathname === '/team' || 
+      location.pathname === '/about';
 
   // ====================================================================
   // 🛒 DURUM 1: SHOP SAYFASI İÇİN FOOTER (BEYAZ TEMA)
@@ -87,7 +93,6 @@ const isShopPage = location.pathname === '/shop' || location.pathname.includes('
         <div className="bg-[#FAFAFA] py-6">
             <div className="max-w-7xl mx-auto px-6 md:px-8">
               <div className="text-sm font-bold text-gray-500 text-center md:text-left">
-                  {/* 👇 GÜNCELLENDİ: Finland */}
                   Made With Love By Finland All Right Reserved
               </div>
             </div>
@@ -165,7 +170,6 @@ const isShopPage = location.pathname === '/shop' || location.pathname.includes('
         {/* 3. Copyright & Social */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center py-8 gap-6 w-full max-w-[300px] mx-auto md:max-w-none">
           <div className="text-sm font-bold text-gray-300 text-left">
-            {/* 👇 GÜNCELLENDİ: Finland */}
             Made With Love By Finland<br className="md:hidden" /> All Right Reserved
           </div>
           <div className="flex items-center gap-5">

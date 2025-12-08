@@ -2,13 +2,46 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+// --- REDUX ---
+import { useSelector } from 'react-redux';
+// -------------
 // İkonlar
 import { Menu, ShoppingCart, User, Search, Heart, Phone, Mail, ChevronDown, ArrowRight } from 'lucide-react'; 
 import { FaInstagram, FaYoutube, FaFacebook, FaTwitter } from 'react-icons/fa';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // Dropdown için yeni state
+  const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
+  
   const location = useLocation();
+
+  // --- REDUX VERİLERİ ---
+  const user = useSelector((state) => state.client.user);
+  const categories = useSelector((state) => state.product.categories);
+  
+  // Kullanıcı giriş yapmış mı kontrolü
+  const isLoggedIn = user && user.email; 
+
+  // --- KATEGORİ MANTIĞI (ADIM 3 EKLENTİSİ) ---
+  // Kategorileri Kadın ve Erkek olarak ayırıyoruz
+  const groupedCategories = categories.reduce((acc, cat) => {
+    // API'den gelen 'code' örn: "k:elbise" -> ilk harf cinsiyet
+    const gender = cat.code.charAt(0) === 'k' ? 'kadin' : 'erkek';
+    acc[gender].push(cat);
+    return acc;
+  }, { kadin: [], erkek: [] });
+
+  // Rating'e göre sıralama (Popülerler üstte)
+  groupedCategories.kadin.sort((a, b) => b.rating - a.rating);
+  groupedCategories.erkek.sort((a, b) => b.rating - a.rating);
+
+  // Link oluşturucu fonksiyon: shop/:gender/:categoryName/:categoryId
+  const getCategoryLink = (cat) => {
+      const gender = cat.code.charAt(0) === 'k' ? 'kadin' : 'erkek';
+      return `/shop/${gender}/${cat.title.toLowerCase()}/${cat.id}`;
+  };
+  // ---------------------------------------------
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -23,6 +56,7 @@ const Header = () => {
   // ############################################################################
   // ####################  BÖLÜM 1: CONTACT PAGE HEADER  ########################
   // #################################===================########################
+  // NOT: Bu kısma hiç dokunmadım, senin orijinal kodunla birebir aynı.
   if (isContactPage) {
     return (
         <div className="w-full font-sans">
@@ -48,17 +82,32 @@ const Header = () => {
                     {/* SAĞ TARAF */}
                     <div className="flex items-center gap-4">
                         
-                        {/* DESKTOP: Sadece Login ve Buton (İkon Yok) */}
+                        {/* DESKTOP: Login Durumuna Göre Değişen Alan */}
                         <div className="hidden md:flex items-center gap-8">
-                            <Link to="/login" className="text-sky-500 font-bold text-sm hover:text-sky-600 transition-colors">
-                                Login
-                            </Link>
-                            <Link to="/register" className="bg-sky-500 hover:bg-sky-600 text-white text-sm font-bold py-3 px-6 rounded flex items-center gap-2 transition-colors">
-                                Become a member <ArrowRight size={16} />
-                            </Link>
+                            {isLoggedIn ? (
+                                <div className="flex items-center gap-3 animate-fade-in">
+                                    <img 
+                                        src={user.avatar} 
+                                        alt={user.name} 
+                                        className="w-10 h-10 rounded-full object-cover border-2 border-sky-500"
+                                    />
+                                    <span className="text-slate-800 font-bold text-sm">
+                                        {user.name}
+                                    </span>
+                                </div>
+                            ) : (
+                                <>
+                                    <Link to="/login" className="text-sky-500 font-bold text-sm hover:text-sky-600 transition-colors">
+                                        Login
+                                    </Link>
+                                    <Link to="/signup" className="bg-sky-500 hover:bg-sky-600 text-white text-sm font-bold py-3 px-6 rounded flex items-center gap-2 transition-colors">
+                                        Become a member <ArrowRight size={16} />
+                                    </Link>
+                                </>
+                            )}
                         </div>
 
-                        {/* MOBİL: Search, Cart ve Hamburger (Fotoğraftaki gibi) */}
+                        {/* MOBİL: Search, Cart ve Hamburger */}
                         <div className="flex items-center gap-4 md:hidden text-slate-800">
                             <button className="hover:text-sky-500">
                                 <Search size={24} strokeWidth={1.5} />
@@ -74,20 +123,23 @@ const Header = () => {
                 </div>
 
                 {/* CONTACT MOBİL MENÜ İÇERİĞİ */}
-                {/* Sadece Home, Product, Pricing, Contact */}
                 <div className={`${isMenuOpen ? 'flex' : 'hidden'} flex-col items-center py-16 space-y-8 md:hidden bg-white border-t border-gray-100 transition-all duration-300 ease-in-out`}>
                     <nav className="flex flex-col items-center gap-8 text-3xl font-normal text-gray-500">
                         <Link to="/" onClick={toggleMenu} className="hover:text-slate-800">Home</Link>
                         <Link to="/product" onClick={toggleMenu} className="hover:text-slate-800">Product</Link>
                         <Link to="/pricing" onClick={toggleMenu} className="hover:text-slate-800">Pricing</Link>
                         <Link to="/contact" onClick={toggleMenu} className="hover:text-slate-800">Contact</Link>
+                        
+                        {isLoggedIn && (
+                            <div className="flex flex-col items-center gap-2 text-sky-500 font-bold">
+                                <img src={user.avatar} alt={user.name} className="w-16 h-16 rounded-full object-cover mb-2" />
+                                <span>{user.name}</span>
+                            </div>
+                        )}
                     </nav>
-                    {/* Mobilde Login/Register butonu GİZLENDİ (Görselde yoktu) */}
                 </div>
             </header>
         </div>
-
-        
     );
   }
 
@@ -141,9 +193,65 @@ const Header = () => {
 
                     <nav className="hidden md:flex items-center gap-4 text-sm font-bold text-gray-500">
                         <Link to="/" className="hover:text-sky-500 transition-colors">Home</Link>
-                        <Link to="/shop" className="flex items-center gap-1 hover:text-sky-500 transition-colors">
-                            Shop <ChevronDown size={14} />
-                        </Link>
+                        
+                        {/* --- DEĞİŞİKLİK BURADA BAŞLIYOR (SHOP DROPDOWN) --- */}
+                        <div 
+                            className="relative group h-full flex items-center"
+                            onMouseEnter={() => setIsShopDropdownOpen(true)}
+                            onMouseLeave={() => setIsShopDropdownOpen(false)}
+                        >
+                            <Link 
+                                to="/shop" 
+                                className="flex items-center gap-1 hover:text-sky-500 transition-colors py-4"
+                            >
+                                Shop <ChevronDown size={14} />
+                            </Link>
+
+                            {/* Dropdown İçeriği */}
+                            {isShopDropdownOpen && (
+                                <div className="absolute top-full left-0 bg-white shadow-lg border border-gray-100 py-6 px-8 min-w-[300px] z-50 flex gap-12 animate-fade-in cursor-default">
+                                    
+                                    {/* KADIN Sütunu */}
+                                    <div className="flex flex-col min-w-[100px]">
+                                        <h4 className="text-slate-800 font-bold mb-4 border-b pb-2 text-base">Kadın</h4>
+                                        <ul className="space-y-3">
+                                            {groupedCategories.kadin.map(cat => (
+                                                <li key={cat.id}>
+                                                    <Link 
+                                                        to={getCategoryLink(cat)} 
+                                                        className="text-gray-500 hover:text-sky-500 font-normal block transition-colors"
+                                                        onClick={() => setIsShopDropdownOpen(false)}
+                                                    >
+                                                        {cat.title}
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* ERKEK Sütunu */}
+                                    <div className="flex flex-col min-w-[100px]">
+                                        <h4 className="text-slate-800 font-bold mb-4 border-b pb-2 text-base">Erkek</h4>
+                                        <ul className="space-y-3">
+                                            {groupedCategories.erkek.map(cat => (
+                                                <li key={cat.id}>
+                                                    <Link 
+                                                        to={getCategoryLink(cat)} 
+                                                        className="text-gray-500 hover:text-sky-500 font-normal block transition-colors"
+                                                        onClick={() => setIsShopDropdownOpen(false)}
+                                                    >
+                                                        {cat.title}
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            )}
+                        </div>
+                        {/* --- DEĞİŞİKLİK BURADA BİTİYOR --- */}
+
                         <Link to="/about" className="hover:text-sky-500 transition-colors">About</Link>
                         <Link to="/blog" className="hover:text-sky-500 transition-colors">Blog</Link>
                         <Link to="/contact" className="hover:text-sky-500 transition-colors">Contact</Link>
@@ -154,11 +262,24 @@ const Header = () => {
                 {/* Sağ: İkonlar */}
                 <div className="flex items-center justify-end gap-6">
                     <div className="hidden md:flex items-center gap-6 text-sky-500 font-bold text-sm">
+                        
+                        {/* --- KULLANICI GİRİŞ DURUMU --- */}
                         <div className="flex items-center">
-                            <Link to="/login" className="flex items-center gap-1 hover:text-sky-600 transition-colors">
-                                <User size={16} className="mr-1 text-sky-500" />
-                                Login / Register
-                            </Link>
+                            {isLoggedIn ? (
+                                <div className="flex items-center gap-2 cursor-pointer hover:text-sky-700 transition-colors">
+                                    <img 
+                                        src={user.avatar} 
+                                        alt={user.name} 
+                                        className="w-8 h-8 rounded-full object-cover" 
+                                    />
+                                    <span>{user.name}</span>
+                                </div>
+                            ) : (
+                                <Link to="/login" className="flex items-center gap-1 hover:text-sky-600 transition-colors">
+                                    <User size={16} className="mr-1 text-sky-500" />
+                                    Login / Register
+                                </Link>
+                            )}
                         </div>
                         
                         <div className="flex items-center gap-4">
@@ -176,11 +297,15 @@ const Header = () => {
                         </div>
                     </div>
 
-                    {/* Mobil İkonlar */}
+                    {/* Mobil Menü Butonu */}
                     <div className="flex items-center gap-4 md:hidden text-slate-800">
                         {isHomePage && (
                             <>
-                                <Link to="/login"><User size={24} strokeWidth={1.5} /></Link>
+                                {isLoggedIn ? (
+                                    <Link to="/profile"><img src={user.avatar} className="w-6 h-6 rounded-full" /></Link>
+                                ) : (
+                                    <Link to="/login"><User size={24} strokeWidth={1.5} /></Link>
+                                )}
                                 <button><Search size={24} strokeWidth={1.5} /></button>
                                 <Link to="/cart"><ShoppingCart size={24} strokeWidth={1.5} /></Link>
                             </>
@@ -205,7 +330,15 @@ const Header = () => {
                 
                 {isShopPage && (
                     <div className="flex flex-col items-center gap-6 mt-8 text-sky-500 font-bold text-xl">
-                        <Link to="/login" onClick={toggleMenu} className="flex items-center gap-2"><User size={24} /> Login / Register</Link>
+                        {isLoggedIn ? (
+                             <div className="flex items-center gap-2">
+                                <img src={user.avatar} className="w-8 h-8 rounded-full" />
+                                <span>{user.name}</span>
+                             </div>
+                        ) : (
+                            <Link to="/login" onClick={toggleMenu} className="flex items-center gap-2"><User size={24} /> Login / Register</Link>
+                        )}
+                        
                         <button className="flex items-center gap-2"><Search size={24} /></button>
                         <Link to="/cart" onClick={toggleMenu} className="flex items-center gap-2"><ShoppingCart size={24} /> 1</Link>
                         <Link to="/wishlist" onClick={toggleMenu} className="flex items-center gap-2"><Heart size={24} /> 1</Link>

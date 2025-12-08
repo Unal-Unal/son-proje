@@ -1,22 +1,49 @@
 // src/pages/ShopPage.js
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts } from '../store/actions/productActions';
 
-// Layout
+// Layout & Components
 import Header from '../layout/Header';
 import Footer from '../layout/Footer';
-
-// Shop Components
 import ShopCategoryCards from '../components/shop/ShopCategoryCards';
 import ShopFilterRow from '../components/shop/ShopFilterRow';
 import ShopProducts from '../components/shop/ShopProducts';
-
-// Global Components (Daha önce oluşturduğumuz ClientsSection)
-import ClientsSection from '../components/ClientsSection'; // 👈 YENİ IMPORT
+import ClientsSection from '../components/ClientsSection';
 
 const ShopPage = () => {
+    const dispatch = useDispatch();
+    const { categoryId } = useParams();
+    
+    // Redux'tan Filter, Sort ve YENİ OLARAK limit/offset değerlerini al
+    const { filter, sort, limit, offset } = useSelector((state) => state.product);
+
+    // --- ANA MANTIK ---
+    useEffect(() => {
+        const queryParams = {
+            limit: limit,   // Varsayılan 25
+            offset: offset  // Varsayılan 0
+        };
+
+        if (categoryId) {
+            queryParams.category = categoryId;
+        }
+        if (filter) {
+            queryParams.filter = filter;
+        }
+        if (sort) {
+            queryParams.sort = sort;
+        }
+
+        // Action'ı çağır
+        dispatch(fetchProducts(queryParams));
+
+    }, [dispatch, categoryId, filter, sort, limit, offset]); // Offset değişince (sayfa atlayınca) tekrar çalışır
+
+
     return (
         <>
             <Header />
@@ -49,11 +76,11 @@ const ShopPage = () => {
                 {/* 3. FİLTRE SATIRI */}
                 <ShopFilterRow />
 
-                {/* 4. ÜRÜN LİSTESİ VE SAYFALAMA */}
+                {/* 4. ÜRÜN LİSTESİ (Pagination buranın içinde) */}
                 <ShopProducts />
 
-                {/* 5. CLIENTS (MARKALAR) BÖLÜMÜ */}
-                <ClientsSection /> {/* 👈 BURAYA EKLENDİ */}
+                {/* 5. CLIENTS */}
+                <ClientsSection />
 
             </main>
 
