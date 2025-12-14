@@ -16,6 +16,9 @@ import AboutPage from './pages/AboutPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 import ShoppingCartPage from './pages/ShoppingCartPage';
+import OrderPage from './pages/OrderPage';
+import OrderSuccessPage from './pages/OrderSuccessPage';
+import PreviousOrdersPage from './pages/PreviousOrdersPage';
 
 function App() {
   const dispatch = useDispatch();
@@ -42,6 +45,9 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/cart" element={<ShoppingCartPage />} />
+        <Route path="/order" element={<OrderPage />} />
+        <Route path="/order-success" element={<OrderSuccessPage />} />
+        <Route path="/previous-orders" element={<PreviousOrdersPage />} />
       </Routes>
     </div>
   );

@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 // --- REDUX ---
-import { useSelector, useDispatch } from 'react-redux'; // useDispatch eklendi
-import { addToCart } from '../store/actions/shoppingCartActions'; // (Test amaçlı gerekebilir)
+import { useSelector, useDispatch } from 'react-redux'; 
+import { addToCart } from '../store/actions/shoppingCartActions'; 
 // -------------
 // İkonlar
 import { Menu, ShoppingCart, User, Search, Heart, Phone, Mail, ChevronDown, ArrowRight, Trash2 } from 'lucide-react'; 
@@ -80,9 +80,24 @@ const Header = () => {
                     <div className="flex items-center gap-4">
                         <div className="hidden md:flex items-center gap-8">
                             {isLoggedIn ? (
-                                <div className="flex items-center gap-3 animate-fade-in">
-                                    <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-sky-500" />
-                                    <span className="text-slate-800 font-bold text-sm">{user.name}</span>
+                                <div className="relative group cursor-pointer z-50">
+                                    <div className="flex items-center gap-3 animate-fade-in">
+                                        <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-sky-500" />
+                                        <span className="text-slate-800 font-bold text-sm">{user.name}</span>
+                                        <ChevronDown size={14} className="text-gray-500" />
+                                    </div>
+                                    {/* --- DROPDOWN MENÜ (Contact Page için) --- */}
+                                    <div className="absolute top-full right-0 w-48 bg-white shadow-lg border border-gray-100 rounded-md py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        <Link to="/previous-orders" className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-sky-500 border-b border-gray-50">
+                                            Siparişlerim
+                                        </Link>
+                                        <button 
+                                            onClick={() => { localStorage.removeItem("token"); window.location.reload(); }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 font-bold mt-1"
+                                        >
+                                            Çıkış Yap
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
                                 <>
@@ -176,11 +191,40 @@ const Header = () => {
                 <div className="flex items-center justify-end gap-6">
                     <div className="hidden md:flex items-center gap-6 text-sky-500 font-bold text-sm">
                         
+                        {/* --- KULLANICI GİRİŞ DURUMU & DROPDOWN --- */}
                         <div className="flex items-center">
                             {isLoggedIn ? (
-                                <div className="flex items-center gap-2 cursor-pointer hover:text-sky-700 transition-colors">
-                                    <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
-                                    <span>{user.name}</span>
+                                <div className="relative group cursor-pointer z-50">
+                                    {/* Tetikleyici */}
+                                    <div className="flex items-center gap-2 hover:text-sky-700 transition-colors py-2">
+                                        <img 
+                                            src={user.avatar} 
+                                            alt={user.name} 
+                                            className="w-8 h-8 rounded-full object-cover" 
+                                        />
+                                        <span>{user.name}</span>
+                                        <ChevronDown size={14} className="text-gray-500" />
+                                    </div>
+
+                                    {/* --- DROPDOWN MENÜ --- */}
+                                    <div className="absolute top-full right-0 w-48 bg-white shadow-lg border border-gray-100 rounded-md py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        <Link 
+                                            to="/previous-orders" 
+                                            className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-sky-500 border-b border-gray-50"
+                                        >
+                                            Siparişlerim
+                                        </Link>
+
+                                        <button 
+                                            onClick={() => {
+                                               localStorage.removeItem("token");
+                                               window.location.reload(); 
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 font-bold mt-1"
+                                        >
+                                            Çıkış Yap
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
                                 <Link to="/login" className="flex items-center gap-1 hover:text-sky-600 transition-colors">
@@ -257,11 +301,13 @@ const Header = () => {
                                             >
                                                 Sepete Git
                                             </Link>
-                                            <button 
-                                                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-center py-3 rounded text-sm font-bold transition-colors"
+                                            <Link 
+                                                to="/order"
+                                                onClick={() => setIsCartDropdownOpen(false)}
+                                                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-center py-3 rounded text-sm font-bold transition-colors flex items-center justify-center"
                                             >
                                                 Siparişi Tamamla
-                                            </button>
+                                            </Link>
                                         </div>
 
                                     </div>

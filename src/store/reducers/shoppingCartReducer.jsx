@@ -66,6 +66,9 @@ export const shoppingCartReducer = (state = initialState, action) => {
             )
         };
 
+    case "RESET_CART":
+        return initialState; // State'i ilk haline döndür (Boş sepet)
+
     default:
       return state;
   }

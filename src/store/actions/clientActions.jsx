@@ -1,6 +1,7 @@
 // Action Creators
 import { axiosInstance } from "../../api/axiosInstance";
 import md5 from "md5";
+import { toast } from "react-toastify";
 
 export const setUser = (user) => ({ type: "SET_USER", payload: user });
 export const setRoles = (roles) => ({ type: "SET_ROLES", payload: roles });
@@ -114,4 +115,131 @@ export const autoLogin = () => (dispatch) => {
         delete axiosInstance.defaults.headers.common["Authorization"];
       });
   }
+};
+
+// --- ADRES YÖNETİMİ AKSİYONLARI ---
+
+// 1. Adres Listesini Çek (GET)
+export const getAddressList = () => (dispatch) => {
+  axiosInstance
+    .get("/user/address")
+    .then((res) => {
+      // Gelen veriyi reducer'a gönder
+      dispatch({ type: "SET_ADDRESS_LIST", payload: res.data });
+    })
+    .catch((err) => {
+      console.error("Adresler yüklenemedi", err);
+    });
+};
+
+// 2. Yeni Adres Ekle (POST)
+export const addAddress = (addressData) => (dispatch) => {
+  return axiosInstance
+    .post("/user/address", addressData)
+    .then((res) => {
+      // Başarılıysa listeyi yenile (veya dönen veriyi direkt ekle)
+      dispatch(getAddressList()); 
+      toast.success("Adres başarıyla kaydedildi");
+    })
+    .catch((err) => {
+      console.error("Adres eklenemedi", err);
+      toast.error("Adres kaydedilirken bir hata oluştu");
+      throw err; // Form içinde .catch ile yakalamak için fırlatıyoruz
+    });
+};
+
+// 3. Adresi Güncelle (PUT)
+export const updateAddress = (addressData) => (dispatch) => {
+  return axiosInstance
+    .put("/user/address", addressData)
+    .then((res) => {
+      dispatch(getAddressList()); // Listeyi yenile
+      toast.success("Adres güncellendi");
+    })
+    .catch((err) => {
+      console.error("Adres güncellenemedi", err);
+      toast.error("Güncelleme başarısız");
+      throw err;
+    });
+};
+
+// 4. Adresi Sil (DELETE)
+export const deleteAddress = (addressId) => (dispatch) => {
+  return axiosInstance
+    .delete(`/user/address/${addressId}`)
+    .then((res) => {
+      dispatch(getAddressList()); // Listeyi yenile
+      toast.success("Adres silindi");
+    })
+    .catch((err) => {
+      console.error("Adres silinemedi", err);
+      toast.error("Silme işlemi başarısız");
+    });
+};
+
+// 1. Kart Listesini Çek (GET /user/card)
+export const getCardList = () => (dispatch) => {
+  axiosInstance
+    .get("/user/card")
+    .then((res) => {
+      dispatch({ type: "SET_CARD_LIST", payload: res.data });
+    })
+    .catch((err) => {
+      console.error("Kartlar yüklenemedi", err);
+    });
+};
+
+// 2. Yeni Kart Ekle (POST /user/card)
+export const addCard = (cardData) => (dispatch) => {
+  return axiosInstance
+    .post("/user/card", cardData)
+    .then((res) => {
+      dispatch(getCardList()); // Listeyi yenile
+      toast.success("Kart başarıyla kaydedildi");
+    })
+    .catch((err) => {
+      console.error("Kart eklenemedi", err);
+      toast.error("Kart kaydedilirken hata oluştu");
+      throw err;
+    });
+};
+
+// 3. Kart Güncelle (PUT /user/card)
+export const updateCard = (cardData) => (dispatch) => {
+  return axiosInstance
+    .put("/user/card", cardData)
+    .then((res) => {
+      dispatch(getCardList());
+      toast.success("Kart güncellendi");
+    })
+    .catch((err) => {
+      console.error("Kart güncellenemedi", err);
+      toast.error("Kart güncellenemedi");
+      throw err;
+    });
+};
+
+// 4. Kart Sil (DELETE /user/card/:cardId)
+export const deleteCard = (cardId) => (dispatch) => {
+  return axiosInstance
+    .delete(`/user/card/${cardId}`)
+    .then((res) => {
+      dispatch(getCardList());
+      toast.success("Kart silindi");
+    })
+    .catch((err) => {
+      console.error("Kart silinemedi", err);
+      toast.error("Kart silinemedi");
+    });
+};
+
+export const getPreviousOrders = () => (dispatch) => {
+  return axiosInstance
+    .get("/order")
+    .then((res) => {
+      dispatch({ type: "SET_ORDER_LIST", payload: res.data });
+    })
+    .catch((err) => {
+      console.error("Sipariş geçmişi yüklenemedi", err);
+    });
 };
