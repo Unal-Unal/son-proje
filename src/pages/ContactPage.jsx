@@ -5,7 +5,7 @@ import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
 import Header from '../layout/Header';
 import Footer from '../layout/Footer';
 import ContactOffices from '../components/contact/ContactOffices';
-import ContactCta from '../components/contact/ContactCta';
+import ContactCta from '../components/contact/ContactCallToAction';
 
 const ContactPage = () => {
   return (
